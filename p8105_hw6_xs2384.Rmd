@@ -8,10 +8,15 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(modelr)
+library(purrr)
 ```
 
 
 ## Problem 1
+
+
+#### Import and clean the data
 
 
 ```{r, warning=FALSE}
@@ -29,3 +34,30 @@ nrow(df[is.na(df),])
 ```
 
 From above, we can see that there is no missing value in the dataset. 
+
+
+
+#### Model Selection
+
+
+I use the stepwise to select model
+
+```{r}
+
+best_model = step(lm(bwt~., data = df), direction = "backward")
+
+
+```
+
+
+The model selected by stepwise is:
+
+```{r}
+best_model$call
+```
+
+
+
+
+
+
