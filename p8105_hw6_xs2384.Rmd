@@ -19,7 +19,7 @@ library(purrr)
 #### Import and clean the data
 
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
 
 df = read_csv("./data/birthweight.csv") %>% janitor::clean_names() %>% mutate(
   babysex = as.factor(babysex),
@@ -42,7 +42,7 @@ From above, we can see that there is no missing value in the dataset.
 
 I use the stepwise to select model
 
-```{r}
+```{r,warning=FALSE, message=FALSE}
 
 my_model = step(lm(bwt~., data = df), direction = "backward")
 
@@ -52,14 +52,14 @@ my_model = step(lm(bwt~., data = df), direction = "backward")
 
 The model selected by stepwise is:
 
-```{r}
+```{r,warning=FALSE, message=FALSE}
 my_model$call
 ```
 
 
 #### Plot of residuals vs fitted value
 
-```{r}
+```{r,warning=FALSE, message=FALSE}
 df %>% add_predictions(my_model) %>% add_residuals(my_model) %>% ggplot(aes(x = pred, y = resid)) + geom_point() + geom_smooth(se = F) + theme_bw() + labs(x = "Fitted Value", y = 'Residuals', title = "Residuals vs Fitted value") + theme(plot.title = element_text(hjust = 0.5))
 ```
 
@@ -68,7 +68,10 @@ From the plot above, we can see that the residuals are normally distributed when
 
 #### Comparing with two models
 
-```{r}
+```{r,warning=FALSE, message=FALSE}
+
+set.seed(1)
+
 cv_df = crossv_mc(df, 100)
 
 cv_df = cv_df %>% 
@@ -105,7 +108,7 @@ From the violin plot above, we can see that my choice of model has the lowest rm
 
 #### Import the data
 
-```{r}
+```{r,warning=FALSE, message=FALSE}
 weather_df = 
   rnoaa::meteo_pull_monitors(
     c("USW00094728"),
@@ -122,10 +125,10 @@ weather_df =
 ```
 
 
-#### Calculate the R^2 and log(beta1 + beta2)
+#### Calculate the R^2 and log(beta0 + beta1)
 
 
-```{r}
+```{r,warning=FALSE, message=FALSE}
 l = function(x){
   lo = log(x[[2]][1] * x[[2]][2])
   lo
@@ -150,10 +153,44 @@ boots_trap = weather_df %>% bootstrap(n = 5000) %>% mutate(
 ```
 
 
-####
+#### Plot the distribution of estimates
 
 
-```{r}
+```{r,warning=FALSE, message=FALSE}
 boots_trap %>% ggplot(aes(x = r_square)) + geom_density(fill = "red", alpha = 0.6) + labs(title = "Distribution of R^2") + theme_bw() + theme(plot.title = element_text(hjust = 0.5))
 ```
 
+
+From the plot above, we can see that r-squared score for each strap is normally distributed with a little left skewness, which means that there are some extremely high r-squared score, the outliers, for some of the straps. 
+
+
+
+```{r,warning=FALSE, message=FALSE}
+boots_trap %>% ggplot(aes(x = log)) + geom_density(fill = "green", alpha = 0.6) + labs(title = "Distribution of log(beta0 * beta1)") + theme_bw() + theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+From the above plot, we can see that the log(beta1 * beta2) estimates are normally distributed through the straps. 
+
+
+#### 95% confidence interval with quantile 0.025, 0.975
+
+
+##### R-square
+
+```{r,warning=FALSE, message=FALSE}
+
+c(quantile(boots_trap$r_square, probs = 0.025), quantile(boots_trap$r_square, probs = 0.975))
+
+```
+
+The 95% confidence interval for r-square with quantile 0.025 and 0.975 is (`r quantile(boots_trap$r_square, probs = 0.025)`, `r quantile(boots_trap$r_square, probs = 0.975)`)
+
+
+##### log(beta0 * beta1)
+
+```{r,warning=FALSE, message=FALSE}
+c(quantile(boots_trap$log, probs = 0.025), quantile(boots_trap$log, probs = 0.975))
+```
+
+The 95% confidence interval for log(beta0 * beta1) with quantile 0.025 and 0.975 is (`r quantile(boots_trap$log, probs = 0.025)`, `r quantile(boots_trap$log, probs = 0.975)`)
