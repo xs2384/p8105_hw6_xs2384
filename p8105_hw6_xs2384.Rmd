@@ -103,3 +103,57 @@ From the violin plot above, we can see that my choice of model has the lowest rm
 
 ## Problem 2
 
+#### Import the data
+
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+
+
+```
+
+
+#### Calculate the R^2 and log(beta1 + beta2)
+
+
+```{r}
+l = function(x){
+  lo = log(x[[2]][1] * x[[2]][2])
+  lo
+}
+
+r = function(x){
+  r2 = x[[2]]
+  r2
+}
+
+set.seed(1)
+
+boots_trap = weather_df %>% bootstrap(n = 5000) %>% mutate(
+  models = map(strap, ~lm(tmax ~ tmin, data = .x)),
+  r_2 = map(models, broom::glance),
+  log = map(models, broom::tidy),
+  r_2 = as.numeric(map(r_2, r)),
+  log = as.numeric(map(log, l))
+  ) %>% select(-strap, -models) %>% rename("r_square" = r_2)
+
+
+```
+
+
+####
+
+
+```{r}
+boots_trap %>% ggplot(aes(x = r_square)) + geom_density(fill = "red", alpha = 0.6) + labs(title = "Distribution of R^2") + theme_bw() + theme(plot.title = element_text(hjust = 0.5))
+```
+
