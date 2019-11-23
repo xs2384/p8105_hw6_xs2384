@@ -2,29 +2,30 @@
 title: "HW6"
 author: "Xinyu Shen xs2384"
 date: "2019/11/22"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Problem 1
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+```{r, warning=FALSE}
+
+df = read_csv("./data/birthweight.csv") %>% janitor::clean_names() %>% mutate(
+  babysex = as.factor(babysex),
+  frace = as.factor(frace),
+  malform = as.factor(malform),
+  mrace = as.factor(mrace)
+)
+
+# check missing value
+nrow(df[is.na(df),])
+
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+From above, we can see that there is no missing value in the dataset. 
