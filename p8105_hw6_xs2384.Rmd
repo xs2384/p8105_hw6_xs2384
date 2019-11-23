@@ -53,8 +53,11 @@ my_model = step(lm(bwt~., data = df), direction = "backward")
 The model selected by stepwise is:
 
 ```{r,warning=FALSE, message=FALSE}
-my_model$call
+my_model %>% summary()
 ```
+
+
+The stepwise select the best model with significant coefficients. The F test shows that the p-value for selected model is far less than 0.05. 
 
 
 #### Plot of residuals vs fitted value
