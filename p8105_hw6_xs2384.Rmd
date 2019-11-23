@@ -57,6 +57,15 @@ best_model$call
 ```
 
 
+#### Plot of residuals vs fitted value
+
+```{r}
+df %>% add_predictions(best_model) %>% add_residuals(best_model) %>% ggplot(aes(x = pred, y = resid)) + geom_point() + geom_smooth(se = F) + theme_bw() + labs(x = "Fitted Value", y = 'Residuals', title = "Residuals vs Fitted value") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+From the plot above, we can see that the residuals are normally distributed when fitted value is from 2000 to 4000. 
+
+
 
 
 
